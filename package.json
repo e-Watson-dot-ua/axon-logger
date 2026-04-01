@@ -1,0 +1,54 @@
+{
+  "name": "@e-watson/axon-logger",
+  "version": "0.0.1",
+  "description": "Lightweight structured logger with colored TTY output and JSON pipe mode",
+  "keywords": [
+    "logger",
+    "logging",
+    "structured",
+    "json",
+    "color",
+    "axon"
+  ],
+  "homepage": "https://github.com/e-Watson-dot-ua/axon-logger#readme",
+  "bugs": { "url": "https://github.com/e-Watson-dot-ua/axon-logger/issues" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/e-Watson-dot-ua/axon-logger.git"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "e-Watson",
+    "url": "https://github.com/e-Watson-dot-ua"
+  },
+  "type": "module",
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./plugin": "./src/plugin.js"
+  },
+  "files": ["src"],
+  "sideEffects": false,
+  "engines": { "node": ">=18.0.0" },
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "node --test \"tests/**/*.test.js\"",
+    "prepublishOnly": "npm run lint && npm test"
+  },
+  "peerDependencies": {
+    "@e-watson/axon": ">=0.0.1"
+  },
+  "peerDependenciesMeta": {
+    "@e-watson/axon": { "optional": true }
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "@types/node": ">=18.0.0",
+    "eslint": "^9.0.0",
+    "eslint-config-prettier": "^10.0.0",
+    "prettier": "^3.0.0"
+  }
+}
