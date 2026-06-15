@@ -1,6 +1,6 @@
 {
   "name": "@e-watson/axon-logger",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Lightweight structured logger with colored TTY output and JSON pipe mode",
   "keywords": [
     "logger",
@@ -27,34 +27,35 @@
     "url": "https://github.com/e-Watson-dot-ua"
   },
   "type": "module",
-  "main": "./src/index.js",
-  "types": "./types/index.d.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./types/index.d.ts",
-      "default": "./src/index.js"
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     },
     "./plugin": {
-      "types": "./types/plugin.d.ts",
-      "default": "./src/plugin.js"
+      "types": "./dist/plugin.d.ts",
+      "default": "./dist/plugin.js"
     }
   },
   "files": [
-    "src",
-    "types"
+    "dist"
   ],
   "sideEffects": false,
   "engines": {
     "node": ">=18.0.0"
   },
   "scripts": {
+    "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
+    "build": "npm run clean && tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "node --test \"tests/**/*.test.js\"",
-    "build:types": "tsc -p tsconfig.build.json",
-    "prepublishOnly": "npm run lint && npm run format:check && npm test && npm run build:types"
+    "test": "node --import tsx --test tests/logger.test.ts tests/plugin.test.ts",
+    "prepublishOnly": "npm run lint && npm run format:check && npm run typecheck && npm test && npm run build"
   },
   "peerDependencies": {
     "@e-watson/axon": ">=0.0.1"
@@ -70,6 +71,8 @@
     "eslint": "^9.0.0",
     "eslint-config-prettier": "^10.0.0",
     "prettier": "^3.0.0",
-    "typescript": "^5.4.0"
+    "tsx": "^4.0.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.0.0"
   }
 }

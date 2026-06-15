@@ -8,13 +8,15 @@ Lightweight structured logger for the Axon family. Zero dependencies.
 - **Runtime**: Node.js >= 18, ESM-only
 - **Zero runtime dependencies**
 - **Peer dep**: `@e-watson/axon` (optional — only for plugin)
-- **No TypeScript** — plain JS with JSDoc types (`jsconfig.json` has `checkJs: true`)
+- **TypeScript** (since v2) — source in `src/*.ts`, compiled by `tsc` to `dist/`
+  (ESM `.js` + `.d.ts`). Strict mode. The published package ships only `dist/`.
 
 ## Architecture
 
-- `src/index.js` — `Logger` class and `createLogger()` factory
-- `src/colors.js` — ANSI color codes, level symbols, value formatting
-- `src/plugin.js` — `axonLogger` Axon plugin (decorates `app.log`, `ctx.log`)
+- `src/index.ts` — `Logger` class, `createLogger()` factory, level/option types
+- `src/colors.ts` — ANSI colors, level symbols, value formatting, safe serialization
+- `src/plugin.ts` — `axonLogger` Axon plugin (decorates `app.log`, `ctx.log`)
+- Build: `tsconfig.json` (typecheck, `noEmit`) + `tsconfig.build.json` (emits `dist/`)
 
 ## Key features
 
@@ -27,13 +29,17 @@ Lightweight structured logger for the Axon family. Zero dependencies.
 
 ## Commands
 
-- `npm test` — run tests
-- `npm run lint` — ESLint
+- `npm run build` — clean + compile `src/` to `dist/`
+- `npm run typecheck` — type-check everything (`src/` + `tests/`) with no emit
+- `npm test` — run tests (TS, executed via `tsx`)
+- `npm run lint` — ESLint (typescript-eslint)
+- `npm run format` / `format:check` — Prettier
 
 ## Conventions
 
 - File naming: dot-separated
-- Tests in `tests/` directory
+- Source and tests are TypeScript (`.ts`); relative imports use `.js` extensions (NodeNext)
+- Tests in `tests/` directory, named `*.test.ts`, run with `node --import tsx --test`
 - Prettier: single quotes, trailing commas, 100 char width, 2-space indent
 - Same style conventions as `@e-watson/axon`
 

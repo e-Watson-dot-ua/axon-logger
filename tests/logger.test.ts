@@ -3,13 +3,9 @@ import assert from 'node:assert/strict';
 import { Writable } from 'node:stream';
 import { Logger, createLogger } from '../src/index.js';
 
-/**
- * Capture stream output into an array of strings.
- * @returns {{ stream: NodeJS.WritableStream, lines: string[] }}
- */
-function capture() {
-  /** @type {string[]} */
-  const lines = [];
+/** Capture stream output into an array of strings. */
+function capture(): { stream: Writable; lines: string[] } {
+  const lines: string[] = [];
   const stream = new Writable({
     write(chunk, _encoding, callback) {
       lines.push(chunk.toString());
@@ -231,7 +227,7 @@ describe('Logger — timers', () => {
     assert.equal(lines.length, 0);
   });
 
-  it('should support custom level for timeEnd', async () => {
+  it('should support custom level for timeEnd', () => {
     const { stream, lines } = capture();
     const log = new Logger({ level: 'trace', pretty: false, stdout: stream, stderr: stream });
 
@@ -295,8 +291,7 @@ describe('Logger — robustness', () => {
     const { stream, lines } = capture();
     const log = new Logger({ pretty: false, stdout: stream, stderr: stream });
 
-    /** @type {any} */
-    const a = { name: 'a' };
+    const a: Record<string, unknown> = { name: 'a' };
     a.self = a;
 
     assert.doesNotThrow(() => log.info('circular', { a }));

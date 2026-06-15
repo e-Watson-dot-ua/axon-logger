@@ -11,7 +11,8 @@ Zero dependencies. Part of the Axon family.
 - **Timers** — `log.time(label)` / `log.timeEnd(label)` for performance measurement
 - **Custom streams** — configurable `stdout` and `stderr` targets
 - **Axon plugin** — `app.register(axonLogger)` attaches `ctx.log` with request ID
-- **Zero dependencies**
+- **First-class TypeScript** — written in TS, ships `.d.ts` declarations
+- **Zero runtime dependencies**
 
 ## Requirements
 
@@ -162,6 +163,22 @@ The plugin decorates `app.log` (app-level logger) and `ctx.log` (request-scoped 
 | info  | ●      | INF   |
 | debug | ○      | DBG   |
 | trace | ┈      | TRC   |
+
+## Development
+
+Source is TypeScript in `src/`, compiled to `dist/` (the published artifact).
+
+```bash
+npm install
+npm run typecheck   # type-check src + tests
+npm run lint        # eslint
+npm test            # run tests via tsx
+npm run build       # emit dist/ (.js + .d.ts)
+```
+
+> **v2 note:** v2 is a TypeScript rewrite. The public API is unchanged from v1 —
+> the same imports and options work — but the package now ships compiled output
+> from `dist/` with bundled type declarations.
 
 ## License
 
