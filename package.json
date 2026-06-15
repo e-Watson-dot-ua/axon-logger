@@ -1,6 +1,6 @@
 {
   "name": "@e-watson/axon-logger",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Lightweight structured logger with colored TTY output and JSON pipe mode",
   "keywords": [
     "logger",
