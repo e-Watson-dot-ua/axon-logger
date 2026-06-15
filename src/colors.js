@@ -27,13 +27,46 @@ export function createColors(enabled) {
  */
 export function createLevelStyles(c) {
   return {
-    fatal: { color: c.redBg, symbol: '\u2716', label: 'FTL' },   // ✖
-    error: { color: c.red, symbol: '\u2718', label: 'ERR' },      // ✘
-    warn:  { color: c.yellow, symbol: '\u25B2', label: 'WRN' },   // ▲
-    info:  { color: c.green, symbol: '\u25CF', label: 'INF' },    // ●
-    debug: { color: c.cyan, symbol: '\u25CB', label: 'DBG' },     // ○
-    trace: { color: c.magenta, symbol: '\u2508', label: 'TRC' },  // ┈
+    fatal: { color: c.redBg, symbol: '\u2716', label: 'FTL' }, // ✖
+    error: { color: c.red, symbol: '\u2718', label: 'ERR' }, // ✘
+    warn: { color: c.yellow, symbol: '\u25B2', label: 'WRN' }, // ▲
+    info: { color: c.green, symbol: '\u25CF', label: 'INF' }, // ●
+    debug: { color: c.cyan, symbol: '\u25CB', label: 'DBG' }, // ○
+    trace: { color: c.magenta, symbol: '\u2508', label: 'TRC' }, // ┈
   };
+}
+
+/**
+ * Convert an Error into a plain, serializable object.
+ * @param {Error} err
+ * @returns {Object<string, any>}
+ */
+export function serializeError(err) {
+  /** @type {Object<string, any>} */
+  const out = { type: err.name, message: err.message, stack: err.stack };
+  // @ts-ignore - cause is standard since ES2022 but optional
+  if (err.cause !== undefined) out.cause = err.cause;
+  return out;
+}
+
+/**
+ * `JSON.stringify` that never throws: handles circular references, BigInt,
+ * Error instances, and functions. A logger must not crash the app.
+ * @param {any} value
+ * @returns {string}
+ */
+export function safeStringify(value) {
+  const seen = new WeakSet();
+  return JSON.stringify(value, (_key, val) => {
+    if (typeof val === 'bigint') return `${val}n`;
+    if (typeof val === 'function') return `[Function: ${val.name || 'anonymous'}]`;
+    if (val instanceof Error) return serializeError(val);
+    if (typeof val === 'object' && val !== null) {
+      if (seen.has(val)) return '[Circular]';
+      seen.add(val);
+    }
+    return val;
+  });
 }
 
 /**
@@ -44,8 +77,9 @@ export function createLevelStyles(c) {
  */
 export function formatValue(val, c) {
   if (typeof val === 'string') return `${c.green}${val}${c.reset}`;
-  if (typeof val === 'number') return `${c.yellow}${val}${c.reset}`;
+  if (typeof val === 'number' || typeof val === 'bigint') return `${c.yellow}${val}${c.reset}`;
   if (typeof val === 'boolean') return `${c.cyan}${val}${c.reset}`;
   if (val === null || val === undefined) return `${c.dim}${val}${c.reset}`;
-  return `${c.gray}${JSON.stringify(val)}${c.reset}`;
+  if (val instanceof Error) return `${c.red}${val.name}: ${val.message}${c.reset}`;
+  return `${c.gray}${safeStringify(val)}${c.reset}`;
 }

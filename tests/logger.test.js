@@ -35,7 +35,12 @@ describe('Logger — JSON mode', () => {
 
   it('should include base fields', () => {
     const { stream, lines } = capture();
-    const log = new Logger({ pretty: false, stdout: stream, stderr: stream, base: { service: 'api' } });
+    const log = new Logger({
+      pretty: false,
+      stdout: stream,
+      stderr: stream,
+      base: { service: 'api' },
+    });
 
     log.info('start');
 
@@ -56,7 +61,12 @@ describe('Logger — JSON mode', () => {
 
   it('should merge base and extra fields', () => {
     const { stream, lines } = capture();
-    const log = new Logger({ pretty: false, stdout: stream, stderr: stream, base: { app: 'test' } });
+    const log = new Logger({
+      pretty: false,
+      stdout: stream,
+      stderr: stream,
+      base: { app: 'test' },
+    });
 
     log.info('req', { code: 200 });
 
@@ -130,7 +140,12 @@ describe('Logger — child', () => {
 
   it('should merge parent and child fields', () => {
     const { stream, lines } = capture();
-    const parent = new Logger({ pretty: false, stdout: stream, stderr: stream, base: { service: 'api' } });
+    const parent = new Logger({
+      pretty: false,
+      stdout: stream,
+      stderr: stream,
+      base: { service: 'api' },
+    });
     const child = parent.child({ reqId: '123' });
 
     child.info('test');
@@ -142,7 +157,12 @@ describe('Logger — child', () => {
 
   it('should not modify parent base', () => {
     const { stream, lines } = capture();
-    const parent = new Logger({ pretty: false, stdout: stream, stderr: stream, base: { app: 'test' } });
+    const parent = new Logger({
+      pretty: false,
+      stdout: stream,
+      stderr: stream,
+      base: { app: 'test' },
+    });
     parent.child({ extra: true });
 
     parent.info('parent');
@@ -227,7 +247,12 @@ describe('Logger — output streams', () => {
   it('should write error and fatal to stderr', () => {
     const out = capture();
     const err = capture();
-    const log = new Logger({ level: 'trace', pretty: false, stdout: out.stream, stderr: err.stream });
+    const log = new Logger({
+      level: 'trace',
+      pretty: false,
+      stdout: out.stream,
+      stderr: err.stream,
+    });
 
     log.info('to stdout');
     log.error('to stderr');
@@ -240,7 +265,12 @@ describe('Logger — output streams', () => {
   it('should write trace/debug/info/warn to stdout', () => {
     const out = capture();
     const err = capture();
-    const log = new Logger({ level: 'trace', pretty: false, stdout: out.stream, stderr: err.stream });
+    const log = new Logger({
+      level: 'trace',
+      pretty: false,
+      stdout: out.stream,
+      stderr: err.stream,
+    });
 
     log.trace('t');
     log.debug('d');
@@ -257,5 +287,81 @@ describe('createLogger', () => {
     const log = createLogger({ level: 'debug' });
     assert.ok(log instanceof Logger);
     assert.equal(log.level, 'debug');
+  });
+});
+
+describe('Logger — robustness', () => {
+  it('should not throw on circular references', () => {
+    const { stream, lines } = capture();
+    const log = new Logger({ pretty: false, stdout: stream, stderr: stream });
+
+    /** @type {any} */
+    const a = { name: 'a' };
+    a.self = a;
+
+    assert.doesNotThrow(() => log.info('circular', { a }));
+    const entry = JSON.parse(lines[0]);
+    assert.equal(entry.a.name, 'a');
+    assert.equal(entry.a.self, '[Circular]');
+  });
+
+  it('should not throw on BigInt values', () => {
+    const { stream, lines } = capture();
+    const log = new Logger({ pretty: false, stdout: stream, stderr: stream });
+
+    assert.doesNotThrow(() => log.info('big', { n: 10n }));
+    const entry = JSON.parse(lines[0]);
+    assert.equal(entry.n, '10n');
+  });
+
+  it('should serialize Error objects with message and stack', () => {
+    const { stream, lines } = capture();
+    const log = new Logger({ pretty: false, stdout: stream, stderr: stream });
+
+    log.error('failed', { err: new Error('boom') });
+
+    const entry = JSON.parse(lines[0]);
+    assert.equal(entry.err.type, 'Error');
+    assert.equal(entry.err.message, 'boom');
+    assert.ok(entry.err.stack.includes('boom'));
+  });
+
+  it('should not let base/extra clobber reserved fields', () => {
+    const { stream, lines } = capture();
+    const log = new Logger({
+      pretty: false,
+      stdout: stream,
+      stderr: stream,
+      base: { level: 'HACK', time: 'HACK' },
+    });
+
+    log.info('real', { msg: 'HACK' });
+
+    const entry = JSON.parse(lines[0]);
+    assert.equal(entry.level, 'info');
+    assert.equal(entry.msg, 'real');
+    assert.notEqual(entry.time, 'HACK');
+  });
+});
+
+describe('Logger — level setter', () => {
+  it('should change the level at runtime', () => {
+    const { stream, lines } = capture();
+    const log = new Logger({ level: 'info', pretty: false, stdout: stream, stderr: stream });
+
+    log.debug('hidden');
+    log.level = 'debug';
+    log.debug('shown');
+
+    assert.equal(lines.length, 1);
+    assert.equal(JSON.parse(lines[0]).msg, 'shown');
+    assert.equal(log.level, 'debug');
+  });
+
+  it('should ignore unknown level names', () => {
+    const log = new Logger({ level: 'info' });
+    // @ts-expect-error - testing invalid input
+    log.level = 'bogus';
+    assert.equal(log.level, 'info');
   });
 });

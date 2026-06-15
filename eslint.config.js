@@ -1,5 +1,5 @@
-import js from "@eslint/js";
-import prettier from "eslint-config-prettier";
+import js from '@eslint/js';
+import prettier from 'eslint-config-prettier';
 
 export default [
   js.configs.recommended,
@@ -7,20 +7,20 @@ export default [
   {
     languageOptions: {
       globals: {
-        Buffer: "readonly",
-        console: "readonly",
-        process: "readonly",
-        setTimeout: "readonly",
-        clearTimeout: "readonly",
-        performance: "readonly",
+        Buffer: 'readonly',
+        console: 'readonly',
+        process: 'readonly',
+        setTimeout: 'readonly',
+        clearTimeout: 'readonly',
+        performance: 'readonly',
       },
     },
     rules: {
-      "no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
-      "no-console": "warn",
+      'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      'no-console': 'warn',
     },
   },
   {
-    ignores: ["dist/", "build/", "coverage/", "node_modules/"],
+    ignores: ['dist/', 'build/', 'coverage/', 'node_modules/'],
   },
 ];

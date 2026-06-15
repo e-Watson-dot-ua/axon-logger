@@ -36,6 +36,7 @@ log.error('connection failed', { db: 'postgres' });
 ```
 
 **TTY output:**
+
 ```
 09:30:15.482 ● INF server started │ port=3000
 09:30:15.483 ▲ WRN deprecated API │ endpoint=/v1
@@ -43,8 +44,9 @@ log.error('connection failed', { db: 'postgres' });
 ```
 
 **Piped output** (`node app.js | jq`):
+
 ```json
-{"level":"info","time":"2026-04-01T09:30:15.482Z","msg":"server started","port":3000}
+{ "level": "info", "time": "2026-04-01T09:30:15.482Z", "msg": "server started", "port": 3000 }
 ```
 
 ## Child Loggers
@@ -69,11 +71,30 @@ await build();
 log.timeEnd('build', 'debug'); // custom level
 ```
 
+## Errors
+
+`Error` objects are serialized automatically — message and stack are preserved
+(plain `JSON.stringify` would drop them, since `Error` has no enumerable fields):
+
+```js
+log.error('request failed', { err: new Error('timeout') });
+// JSON: {"level":"error",...,"err":{"type":"Error","message":"timeout","stack":"..."}}
+```
+
+Circular references and `BigInt` values are handled safely too — the logger
+never throws while serializing.
+
 ## Silent Mode
 
 ```js
 const log = createLogger({ level: 'silent' }); // suppress all output
+
+const log2 = createLogger({ level: 'info' });
+log2.level = 'debug'; // change the level at runtime
 ```
+
+Colors honor the [`NO_COLOR`](https://no-color.org) convention — set
+`NO_COLOR=1` to keep the human-readable layout without ANSI codes.
 
 ## Custom Streams
 
@@ -108,39 +129,39 @@ The plugin decorates `app.log` (app-level logger) and `ctx.log` (request-scoped 
 
 ### `createLogger(opts?)`
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `level` | `string` | `'info'` | Minimum log level |
-| `pretty` | `boolean` | auto-detect | Force pretty/JSON mode |
-| `base` | `object` | `{}` | Fields included in every log entry |
-| `stdout` | `WritableStream` | `process.stdout` | Output for trace–warn |
-| `stderr` | `WritableStream` | `process.stderr` | Output for error–fatal |
+| Option   | Type             | Default          | Description                        |
+| -------- | ---------------- | ---------------- | ---------------------------------- |
+| `level`  | `string`         | `'info'`         | Minimum log level                  |
+| `pretty` | `boolean`        | auto-detect      | Force pretty/JSON mode             |
+| `base`   | `object`         | `{}`             | Fields included in every log entry |
+| `stdout` | `WritableStream` | `process.stdout` | Output for trace–warn              |
+| `stderr` | `WritableStream` | `process.stderr` | Output for error–fatal             |
 
 ### Logger methods
 
-| Method | Description |
-|--------|-------------|
-| `log.fatal(msg, extra?)` | Level 60 — unrecoverable |
-| `log.error(msg, extra?)` | Level 50 — errors |
-| `log.warn(msg, extra?)` | Level 40 — warnings |
-| `log.info(msg, extra?)` | Level 30 — informational |
-| `log.debug(msg, extra?)` | Level 20 — debug details |
-| `log.trace(msg, extra?)` | Level 10 — fine-grained trace |
-| `log.child(fields)` | Create child logger with extra fields |
-| `log.time(label)` | Start a timer |
-| `log.timeEnd(label, level?)` | End timer, log elapsed ms |
-| `log.level` | Current level name (readonly) |
+| Method                       | Description                                                |
+| ---------------------------- | ---------------------------------------------------------- |
+| `log.fatal(msg, extra?)`     | Level 60 — unrecoverable                                   |
+| `log.error(msg, extra?)`     | Level 50 — errors                                          |
+| `log.warn(msg, extra?)`      | Level 40 — warnings                                        |
+| `log.info(msg, extra?)`      | Level 30 — informational                                   |
+| `log.debug(msg, extra?)`     | Level 20 — debug details                                   |
+| `log.trace(msg, extra?)`     | Level 10 — fine-grained trace                              |
+| `log.child(fields)`          | Create child logger with extra fields                      |
+| `log.time(label)`            | Start a timer                                              |
+| `log.timeEnd(label, level?)` | End timer, log elapsed ms                                  |
+| `log.level`                  | Current level name (get/set — assign to change at runtime) |
 
 ### Level symbols (TTY)
 
 | Level | Symbol | Label |
-|-------|--------|-------|
-| fatal | ✖ | FTL |
-| error | ✘ | ERR |
-| warn | ▲ | WRN |
-| info | ● | INF |
-| debug | ○ | DBG |
-| trace | ┈ | TRC |
+| ----- | ------ | ----- |
+| fatal | ✖      | FTL   |
+| error | ✘      | ERR   |
+| warn  | ▲      | WRN   |
+| info  | ●      | INF   |
+| debug | ○      | DBG   |
+| trace | ┈      | TRC   |
 
 ## License
 

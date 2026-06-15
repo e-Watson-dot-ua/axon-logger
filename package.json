@@ -11,44 +11,65 @@
     "axon"
   ],
   "homepage": "https://github.com/e-Watson-dot-ua/axon-logger#readme",
-  "bugs": { "url": "https://github.com/e-Watson-dot-ua/axon-logger/issues" },
+  "bugs": {
+    "url": "https://github.com/e-Watson-dot-ua/axon-logger/issues"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/e-Watson-dot-ua/axon-logger.git"
   },
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "author": {
     "name": "e-Watson",
     "url": "https://github.com/e-Watson-dot-ua"
   },
   "type": "module",
   "main": "./src/index.js",
+  "types": "./types/index.d.ts",
   "exports": {
-    ".": "./src/index.js",
-    "./plugin": "./src/plugin.js"
+    ".": {
+      "types": "./types/index.d.ts",
+      "default": "./src/index.js"
+    },
+    "./plugin": {
+      "types": "./types/plugin.d.ts",
+      "default": "./src/plugin.js"
+    }
   },
-  "files": ["src"],
+  "files": [
+    "src",
+    "types"
+  ],
   "sideEffects": false,
-  "engines": { "node": ">=18.0.0" },
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "node --test \"tests/**/*.test.js\"",
-    "prepublishOnly": "npm run lint && npm test"
+    "build:types": "tsc -p tsconfig.build.json",
+    "prepublishOnly": "npm run lint && npm run format:check && npm test && npm run build:types"
   },
   "peerDependencies": {
     "@e-watson/axon": ">=0.0.1"
   },
   "peerDependenciesMeta": {
-    "@e-watson/axon": { "optional": true }
+    "@e-watson/axon": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
     "@types/node": ">=18.0.0",
     "eslint": "^9.0.0",
     "eslint-config-prettier": "^10.0.0",
-    "prettier": "^3.0.0"
+    "prettier": "^3.0.0",
+    "typescript": "^5.4.0"
   }
 }

@@ -1,4 +1,4 @@
-import { createColors, createLevelStyles, formatValue } from './colors.js';
+import { createColors, createLevelStyles, formatValue, safeStringify } from './colors.js';
 
 /** @type {Record<string, number>} */
 const LEVELS = { fatal: 60, error: 50, warn: 40, info: 30, debug: 20, trace: 10, silent: 100 };
@@ -45,8 +45,11 @@ export class Logger {
     this.#stderr = opts.stderr ?? process.stderr;
     this.#level = LEVELS[opts.level ?? 'info'] ?? 30;
     this.#base = opts.base ?? {};
-    this.#pretty = opts.pretty ?? (/** @type {any} */ (this.#stdout).isTTY ?? false);
-    this.#colors = createColors(this.#pretty);
+    this.#pretty = opts.pretty ?? /** @type {any} */ (this.#stdout).isTTY ?? false;
+    // Honor the NO_COLOR convention (https://no-color.org): keep the pretty
+    // layout but drop ANSI codes when NO_COLOR is set to a non-empty value.
+    const color = this.#pretty && !process.env.NO_COLOR;
+    this.#colors = createColors(color);
     this.#styles = createLevelStyles(this.#colors);
   }
 
@@ -69,17 +72,29 @@ export class Logger {
   }
 
   /** @param {string} msg @param {Object} [extra] */
-  fatal(msg, extra) { this.#log('fatal', msg, extra); }
+  fatal(msg, extra) {
+    this.#log('fatal', msg, extra);
+  }
   /** @param {string} msg @param {Object} [extra] */
-  error(msg, extra) { this.#log('error', msg, extra); }
+  error(msg, extra) {
+    this.#log('error', msg, extra);
+  }
   /** @param {string} msg @param {Object} [extra] */
-  warn(msg, extra) { this.#log('warn', msg, extra); }
+  warn(msg, extra) {
+    this.#log('warn', msg, extra);
+  }
   /** @param {string} msg @param {Object} [extra] */
-  info(msg, extra) { this.#log('info', msg, extra); }
+  info(msg, extra) {
+    this.#log('info', msg, extra);
+  }
   /** @param {string} msg @param {Object} [extra] */
-  debug(msg, extra) { this.#log('debug', msg, extra); }
+  debug(msg, extra) {
+    this.#log('debug', msg, extra);
+  }
   /** @param {string} msg @param {Object} [extra] */
-  trace(msg, extra) { this.#log('trace', msg, extra); }
+  trace(msg, extra) {
+    this.#log('trace', msg, extra);
+  }
 
   /**
    * Start a timer.
@@ -108,6 +123,14 @@ export class Logger {
       if (val === this.#level) return name;
     }
     return 'info';
+  }
+
+  /**
+   * Change the log level at runtime. Unknown names are ignored.
+   * @param {'fatal' | 'error' | 'warn' | 'info' | 'debug' | 'trace' | 'silent'} name
+   */
+  set level(name) {
+    if (name in LEVELS) this.#level = LEVELS[name];
   }
 
   /**
@@ -144,7 +167,9 @@ export class Logger {
     const fields = { ...this.#base, ...extra };
     const keys = Object.keys(fields);
     if (keys.length > 0) {
-      const pairs = keys.map((k) => `${c.dim}${k}${c.reset}${c.gray}=${c.reset}${formatValue(fields[k], c)}`);
+      const pairs = keys.map(
+        (k) => `${c.dim}${k}${c.reset}${c.gray}=${c.reset}${formatValue(fields[k], c)}`,
+      );
       line += ` ${c.gray}\u2502${c.reset} ${pairs.join(' ')}`;
     }
 
@@ -158,14 +183,13 @@ export class Logger {
    * @returns {string}
    */
   #formatJson(level, msg, extra) {
-    const entry = {
-      level,
-      time: new Date().toISOString(),
-      ...this.#base,
-      msg,
-      ...extra,
-    };
-    return JSON.stringify(entry) + '\n';
+    const fields = { ...this.#base, ...extra };
+    // Reserved keys are authoritative — never let base/extra clobber them.
+    delete fields.level;
+    delete fields.time;
+    delete fields.msg;
+    const entry = { level, time: new Date().toISOString(), msg, ...fields };
+    return safeStringify(entry) + '\n';
   }
 }
 
