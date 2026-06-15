@@ -1,4 +1,4 @@
-import type { Level } from './index.js';
+import type { Level } from './index';
 
 /** ANSI color/style codes (empty strings when colors are disabled). */
 export interface Colors {

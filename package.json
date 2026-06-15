@@ -47,8 +47,7 @@
     "node": ">=18.0.0"
   },
   "scripts": {
-    "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
-    "build": "npm run clean && tsc -p tsconfig.build.json",
+    "build": "tsup",
     "typecheck": "tsc -p tsconfig.json",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -56,6 +55,9 @@
     "format:check": "prettier --check .",
     "test": "node --import tsx --test tests/logger.test.ts tests/plugin.test.ts",
     "prepublishOnly": "npm run lint && npm run format:check && npm run typecheck && npm test && npm run build"
+  },
+  "overrides": {
+    "esbuild": "^0.28.1"
   },
   "peerDependencies": {
     "@e-watson/axon": ">=0.0.1"
@@ -71,6 +73,7 @@
     "eslint": "^9.0.0",
     "eslint-config-prettier": "^10.0.0",
     "prettier": "^3.0.0",
+    "tsup": "^8.0.0",
     "tsx": "^4.0.0",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.0.0"

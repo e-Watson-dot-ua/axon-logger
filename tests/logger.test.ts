@@ -1,7 +1,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { Writable } from 'node:stream';
-import { Logger, createLogger } from '../src/index.js';
+import { Logger, createLogger } from '../src/index';
 
 /** Capture stream output into an array of strings. */
 function capture(): { stream: Writable; lines: string[] } {

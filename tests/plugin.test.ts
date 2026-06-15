@@ -1,8 +1,8 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { Writable } from 'node:stream';
-import { axonLogger, type AxonApp, type AxonContext } from '../src/plugin.js';
-import { Logger } from '../src/index.js';
+import { axonLogger, type AxonApp, type AxonContext } from '../src/plugin';
+import { Logger } from '../src/index';
 
 interface FakeApp extends AxonApp {
   decorations: Record<string, unknown>;

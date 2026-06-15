@@ -166,7 +166,8 @@ The plugin decorates `app.log` (app-level logger) and `ctx.log` (request-scoped 
 
 ## Development
 
-Source is TypeScript in `src/`, compiled to `dist/` (the published artifact).
+Source is TypeScript in `src/`, bundled with `tsup` to `dist/` (the published
+artifact). Relative imports in source are extensionless (e.g. `./colors`).
 
 ```bash
 npm install

@@ -1,4 +1,4 @@
-import { Logger, type LoggerOptions } from './index.js';
+import { Logger, type LoggerOptions } from './index';
 
 /** Minimal shape of an Axon app the plugin relies on. */
 export interface AxonApp {

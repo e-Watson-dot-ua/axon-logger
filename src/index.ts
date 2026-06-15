@@ -5,7 +5,7 @@ import {
   safeStringify,
   type Colors,
   type LevelStyle,
-} from './colors.js';
+} from './colors';
 
 /** Log levels that produce output, from most to least severe. */
 export type Level = 'fatal' | 'error' | 'warn' | 'info' | 'debug' | 'trace';
